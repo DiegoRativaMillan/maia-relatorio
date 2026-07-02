@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>XMA.IA - Benchmarking de Gestão de Ativos</title>
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS para estilização moderna e rápida -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js -->
+    <!-- Chart.js para renderização de gráficos interativos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- FontAwesome para ícones -->
+    <!-- FontAwesome para ícones dinâmicos de interface -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
@@ -37,7 +37,7 @@
             color: #05b9f9;
             border-color: #05b9f9;
         }
-        /* Estilo customizado para o scrollbar das abas */
+        /* Estilo personalizado para a barra de rolagem horizontal das abas */
         .overflow-x-auto::-webkit-scrollbar {
             height: 4px;
         }
@@ -53,12 +53,11 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center gap-3">
-                    <!-- LOGO DA EMPRESA: Agora buscando "logo.png" (todo minúsculo) com fallback de carregamento -->
-                    <div class="relative h-10 flex items-center justify-center">
-                        <img src="Logo.png" alt="Logo Empresa" class="h-10 w-auto object-contain transition-all duration-300" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='flex';">
-                        <div id="fallback-logo" class="hidden bg-gradient-to-br from-[#05b9f9] to-[#4B227A] text-white p-2 rounded-lg font-bold tracking-wider text-xl items-center justify-center h-10 w-10 shadow-lg shadow-[#05b9f9]/20">
-                            L
-                        </div>
+                    <!-- LOGO DA EMPRESA: Totalmente auto-contido com SVG vetorial para evitar requisições de ficheiros locais -->
+                    <div class="bg-gradient-to-br from-[#05b9f9] to-[#4B227A] text-white p-2 rounded-lg font-bold tracking-wider text-xl flex items-center justify-center h-10 w-10 shadow-lg shadow-[#05b9f9]/20">
+                        <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
                     </div>
                     <div>
                         <h1 class="text-lg font-semibold tracking-tight text-white leading-none">XMA.IA</h1>
@@ -76,7 +75,7 @@
 
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
         
-        <!-- Welcome banner with description -->
+        <!-- Faixa de boas-vindas com descrição executiva -->
         <div class="bg-gradient-to-r from-[#4B227A]/30 via-[#104283]/40 to-[#02153d]/80 rounded-xl p-6 border border-[#05b9f9]/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-lg">
             <div class="space-y-1">
                 <h2 class="text-2xl font-bold tracking-tight gradient-text-cyan">Análise Global de Maturidade Industrial</h2>
@@ -90,9 +89,9 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <!-- Left side control sidebar -->
+            <!-- Barra lateral de filtros e controlos -->
             <div class="lg:col-span-1 flex flex-col gap-6">
-                <!-- Checkbox controller for active companies -->
+                <!-- Controlador de caixas de seleção das indústrias ativas -->
                 <div class="card-glass rounded-xl p-5 border border-[#104283]/40 space-y-4">
                     <div class="flex items-center justify-between">
                         <h3 class="text-sm font-bold text-neutral-100 uppercase tracking-wider">Indústrias</h3>
@@ -101,11 +100,11 @@
                         </div>
                     </div>
                     <div id="companiesCheckboxes" class="flex flex-col gap-2">
-                        <!-- Dynamic checkboxes populated here -->
+                        <!-- Gerado dinamicamente via Javascript -->
                     </div>
                 </div>
 
-                <!-- AMMA Maturity Levels Info Card -->
+                <!-- Painel Informativo sobre Níveis de Maturidade AMMA -->
                 <div class="card-glass rounded-xl p-5 border border-[#104283]/40 space-y-4">
                     <h3 class="text-sm font-bold text-neutral-100 uppercase tracking-wider">Legenda AMMA</h3>
                     <div class="space-y-3 text-xs">
@@ -141,10 +140,10 @@
                 </div>
             </div>
 
-            <!-- Right side dashboard contents -->
+            <!-- Painel principal com sistema de abas -->
             <div class="lg:col-span-3 flex flex-col gap-6">
                 
-                <!-- Tab Headers -->
+                <!-- Cabeçalhos das Abas -->
                 <div class="flex border-b border-[#104283]/40 gap-6 text-sm overflow-x-auto">
                     <button onclick="switchTab('tab-global')" id="tabBtn-global" class="pb-3 px-1 font-semibold active-tab transition flex items-center gap-2 whitespace-nowrap focus:outline-none">
                         <i class="fa-solid fa-chart-line"></i> Radar Comparativo Global
@@ -157,7 +156,7 @@
                     </button>
                 </div>
 
-                <!-- TAB Content: Global Radar -->
+                <!-- Conteúdo da Aba: Radar Comparativo Global -->
                 <div id="tab-global" class="tab-content space-y-6">
                     <div class="card-glass rounded-xl p-6 border border-[#104283]/40 space-y-4">
                         <div class="flex items-center justify-between">
@@ -172,17 +171,17 @@
                     </div>
                 </div>
 
-                <!-- TAB Content: Pillar Explorer -->
+                <!-- Conteúdo da Aba: Explorador Detalhado por Pilar -->
                 <div id="tab-explorer" class="tab-content hidden space-y-6">
                     <div class="card-glass rounded-xl p-6 border border-[#104283]/40 space-y-4">
                         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div>
                                 <h3 class="text-lg font-bold text-neutral-100">Explorador de Pilares</h3>
-                                <p class="text-xs text-neutral-400">Selecione um dos 12 pilares do assessment para analisar o benchmarking em detalhes.</p>
+                                <p class="text-xs text-neutral-400">Selecione um dos 12 pilares do assessment para analisar o benchmarking em detalhe.</p>
                             </div>
                             <div class="w-full md:w-80">
                                 <select id="pilarSelector" onchange="loadPillarData()" class="w-full bg-[#02153d] border border-[#104283]/60 rounded-lg px-3 py-2 text-sm text-neutral-200 focus:outline-none focus:border-[#05b9f9] cursor-pointer">
-                                    <!-- Populado dinamicamente via JS -->
+                                    <!-- Preenchido dinamicamente via JS -->
                                 </select>
                             </div>
                         </div>
@@ -192,13 +191,13 @@
                         </div>
                     </div>
 
-                    <!-- Cards layout para detalhes adicionais (Fortalezas, Dores, Oportunidades) -->
+                    <!-- Cartões de análise detalhada por pilar (Fortalezas, Dores, Oportunidades) -->
                     <div id="pillarCardsContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                        <!-- Populado dinamicamente via JS -->
+                        <!-- Preenchido dinamicamente via JS -->
                     </div>
                 </div>
 
-                <!-- TAB Content: Roadmap de Evolução Recomendado (3 Ondas) -->
+                <!-- Conteúdo da Aba: Plano de Evolução Recomendado (Roadmap 3 Ondas) -->
                 <div id="tab-roadmap" class="tab-content hidden space-y-6">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#104283]/20 p-4 rounded-xl border border-[#05b9f9]/20">
                         <div>
@@ -209,7 +208,7 @@
                         </div>
                         <div class="w-full sm:w-64">
                             <select id="roadmapCompanySelector" onchange="renderDynamicRoadmap()" class="w-full bg-[#02153d] border border-[#104283]/60 rounded-lg px-3 py-2 text-sm text-neutral-200 focus:outline-none focus:border-[#05b9f9] cursor-pointer">
-                                <!-- Populado dinamicamente via JS -->
+                                <!-- Preenchido dinamicamente via JS -->
                             </select>
                         </div>
                     </div>
@@ -555,7 +554,7 @@
                     "M. Dias Branco": "Múltiplas ferramentas confundem as análises operacionais dos gerentes de linha.",
                     "Moura": "Carga informacional altíssima depende de digitação e transferência manual p/ cruzar O.S.",
                     "Stellantis": "Dados massivos não predizem sozinhas pois não contam com base 'MLOps' amadurecida, nem cibersegurança contínua (OT sec).",
-                    "Vivix": "Operação 100% desconectada da automação analítica; não há algoritmos interpretando os dados sem esforço humano bruto.",
+                    "Vivix": "Operação 100% desconectada da automação analítica; não há algoritmos interpretando os dados sem o esforço humano bruto.",
                     "Brose": "Nenhuma técnica avançada de DataOps cruza o potencial de inteligência dos dados descritivos na rede."
                 },
                 oportunidades: {
