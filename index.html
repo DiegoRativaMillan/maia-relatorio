@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XMA.IA - Benchmarking de Gestão de Ativos</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #02153d;
+        }
+        .gradient-text-cyan {
+            background: linear-gradient(135deg, #05b9f9 0%, #00e676 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card-glass {
+            background: rgba(16, 66, 131, 0.15);
+            border: 1px solid rgba(5, 185, 249, 0.15);
+            backdrop-filter: blur(12px);
+        }
+        .gradient-btn-vibrant {
+            background: linear-gradient(135deg, #4B227A 0%, #104283 50%, #05b9f9 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(5, 185, 249, 0.2);
+        }
+        .gradient-btn-vibrant:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(5, 185, 249, 0.4);
+        }
+        .active-tab {
+            color: #05b9f9;
+            border-color: #05b9f9;
+        }
+        /* Estilo customizado para o scrollbar das abas */
+        .overflow-x-auto::-webkit-scrollbar {
+            height: 4px;
+        }
+        .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: rgba(5, 185, 249, 0.3);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="text-neutral-200 min-h-screen flex flex-col antialiased">
+
+    <header class="bg-[#02153d]/90 border-b border-[#104283]/40 sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <!-- LOGO DA EMPRESA: Chama "Logo.png" localmente com sistema de fallback contra quebra de imagem -->
+                    <div class="relative h-10 flex items-center justify-center">
+                        <img src="Logo.png" alt="Logo Empresa" class="h-10 w-auto object-contain transition-all duration-300" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='flex';">
+                        <div id="fallback-logo" class="hidden bg-gradient-to-br from-[#05b9f9] to-[#4B227A] text-white p-2 rounded-lg font-bold tracking-wider text-xl items-center justify-center h-10 w-10 shadow-lg shadow-[#05b9f9]/20">
+                            L
+                        </div>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-semibold tracking-tight text-white leading-none">XMA.IA</h1>
+                        <span class="text-xs text-neutral-400 font-medium tracking-wide">Benchmarking de Gestão de Ativos</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="bg-[#05b9f9]/10 text-[#05b9f9] px-3 py-1 rounded-full text-xs font-semibold border border-[#05b9f9]/25 shadow-[0_0_10px_rgba(5,185,249,0.1)]">
+                        <i class="fa-solid fa-square-poll-vertical mr-1"></i> ISO 55000 &amp; AMMA
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
+        
+        <!-- Welcome banner with description -->
+        <div class="bg-gradient-to-r from-[#4B227A]/30 via-[#104283]/40 to-[#02153d]/80 rounded-xl p-6 border border-[#05b9f9]/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-lg">
+            <div class="space-y-1">
+                <h2 class="text-2xl font-bold tracking-tight gradient-text-cyan">Análise Global de Maturidade Industrial</h2>
+                <p class="text-neutral-300 text-sm max-w-3xl">Compare as práticas de 5 gigantes industriais de alta performance, explore dores e fortalezas táticas por pilar e visualize o plano de evolução recomendado (Roadmap) em ondas estruturadas.</p>
+            </div>
+            <div class="flex gap-2 w-full md:w-auto shrink-0">
+                <button onclick="window.print()" class="w-full md:w-auto gradient-btn-vibrant text-white px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-print"></i> Imprimir Painel
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Left side control sidebar -->
+            <div class="lg:col-span-1 flex flex-col gap-6">
+                <!-- Checkbox controller for active companies -->
+                <div class="card-glass rounded-xl p-5 border border-[#104283]/40 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-bold text-neutral-100 uppercase tracking-wider">Indústrias</h3>
+                        <div class="flex gap-2">
+                            <button onclick="toggleAllCompanies(true)" class="text-[10px] text-[#05b9f9] hover:underline font-semibold focus:outline-none">Todas</button>
+                        </div>
+                    </div>
+                    <div id="companiesCheckboxes" class="flex flex-col gap-2">
+                        <!-- Dynamic checkboxes populated here -->
+                    </div>
+                </div>
+
+                <!-- AMMA Maturity Levels Info Card -->
+                <div class="card-glass rounded-xl p-5 border border-[#104283]/40 space-y-4">
+                    <h3 class="text-sm font-bold text-neutral-100 uppercase tracking-wider">Legenda AMMA</h3>
+                    <div class="space-y-3 text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded bg-red-500/20 border border-red-500 text-red-400 flex items-center justify-center font-bold text-[8px]">1</span>
+                            <div>
+                                <p class="font-semibold text-neutral-200">Prática Deficiente / Inicial</p>
+                                <p class="text-neutral-400">Processos reativos e informais.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded bg-orange-500/20 border border-orange-500 text-orange-400 flex items-center justify-center font-bold text-[8px]">2</span>
+                            <div>
+                                <p class="font-semibold text-neutral-200">Prática Básica</p>
+                                <p class="text-neutral-400">Processos preventivos locais.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded bg-yellow-500/20 border border-yellow-500 text-yellow-400 flex items-center justify-center font-bold text-[8px]">3</span>
+                            <div>
+                                <p class="font-semibold text-neutral-200">Prática Avançada</p>
+                                <p class="text-neutral-400">Integração de confiabilidade.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded bg-emerald-500/20 border border-emerald-500 text-emerald-400 flex items-center justify-center font-bold text-[8px]">4</span>
+                            <div>
+                                <p class="font-semibold text-neutral-200">Melhores Práticas</p>
+                                <p class="text-neutral-400">Otimização dinâmica de risco/custo.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right side dashboard contents -->
+            <div class="lg:col-span-3 flex flex-col gap-6">
+                
+                <!-- Tab Headers -->
+                <div class="flex border-b border-[#104283]/40 gap-6 text-sm overflow-x-auto">
+                    <button onclick="switchTab('tab-global')" id="tabBtn-global" class="pb-3 px-1 font-semibold active-tab transition flex items-center gap-2 whitespace-nowrap focus:outline-none">
+                        <i class="fa-solid fa-chart-line"></i> Radar Comparativo Global
+                    </button>
+                    <button onclick="switchTab('tab-explorer')" id="tabBtn-explorer" class="pb-3 px-1 font-semibold text-neutral-400 transition flex items-center gap-2 whitespace-nowrap focus:outline-none">
+                        <i class="fa-solid fa-folder-open"></i> Explorador Detalhado por Pilar
+                    </button>
+                    <button onclick="switchTab('tab-roadmap')" id="tabBtn-roadmap" class="pb-3 px-1 font-semibold text-neutral-400 transition flex items-center gap-2 whitespace-nowrap focus:outline-none">
+                        <i class="fa-solid fa-route"></i> Plano de Evolução Recomendado
+                    </button>
+                </div>
+
+                <!-- TAB Content: Global Radar -->
+                <div id="tab-global" class="tab-content space-y-6">
+                    <div class="card-glass rounded-xl p-6 border border-[#104283]/40 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-bold text-neutral-100">Visão Geral de Maturidade</h3>
+                                <p class="text-xs text-neutral-400">Mapeamento geral obtido pelas indústrias nos 12 pilares do benchmarking.</p>
+                            </div>
+                        </div>
+                        <div class="h-[400px] relative w-full">
+                            <canvas id="globalRadarChartCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB Content: Pillar Explorer -->
+                <div id="tab-explorer" class="tab-content hidden space-y-6">
+                    <div class="card-glass rounded-xl p-6 border border-[#104283]/40 space-y-4">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <h3 class="text-lg font-bold text-neutral-100">Explorador de Pilares</h3>
+                                <p class="text-xs text-neutral-400">Selecione um dos 12 pilares do assessment para analisar o benchmarking em detalhes.</p>
+                            </div>
+                            <div class="w-full md:w-80">
+                                <select id="pilarSelector" onchange="loadPillarData()" class="w-full bg-[#02153d] border border-[#104283]/60 rounded-lg px-3 py-2 text-sm text-neutral-200 focus:outline-none focus:border-[#05b9f9] cursor-pointer">
+                                    <!-- Populado dinamicamente via JS -->
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="h-64 relative w-full">
+                            <canvas id="pillarBarChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Cards layout para detalhes adicionais (Fortalezas, Dores, Oportunidades) -->
+                    <div id="pillarCardsContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        <!-- Populado dinamicamente via JS -->
+                    </div>
+                </div>
+
+                <!-- TAB Content: Roadmap de Evolução Recomendado (3 Ondas) -->
+                <div id="tab-roadmap" class="tab-content hidden space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#104283]/20 p-4 rounded-xl border border-[#05b9f9]/20">
+                        <div>
+                            <h3 class="text-sm font-bold text-neutral-100 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-industry text-[#05b9f9]"></i> Selecione a Indústria para o Plano
+                            </h3>
+                            <p class="text-xs text-neutral-400">Visualize a jornada tática recomendada para a unidade escolhida.</p>
+                        </div>
+                        <div class="w-full sm:w-64">
+                            <select id="roadmapCompanySelector" onchange="renderDynamicRoadmap()" class="w-full bg-[#02153d] border border-[#104283]/60 rounded-lg px-3 py-2 text-sm text-neutral-200 focus:outline-none focus:border-[#05b9f9] cursor-pointer">
+                                <!-- Populado dinamicamente via JS -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- O "Norte" Estratégico (O Grande Objetivo) -->
+                    <div class="card-glass rounded-xl p-6 border-l-4 border-[#05b9f9] space-y-2">
+                        <span class="text-[10px] text-[#05b9f9] uppercase tracking-wider font-extrabold flex items-center gap-1.5">
+                            <i class="fa-solid fa-compass"></i> Norte Estratégico (O Grande Objetivo)
+                        </span>
+                        <p id="roadmapNorte" class="text-sm text-neutral-200 leading-relaxed font-semibold">
+                            <!-- Injetado dinamicamente -->
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Onda 1 -->
+                        <div class="card-glass rounded-xl p-5 border border-[#05b9f9]/20 flex flex-col justify-between space-y-4 hover:border-[#05b9f9]/50 transition duration-300">
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="bg-[#05b9f9]/10 text-[#05b9f9] px-3 py-1 rounded-full text-xs font-bold border border-[#05b9f9]/25">
+                                        Onda 1
+                                    </span>
+                                    <span class="text-xs text-neutral-400 font-semibold flex items-center gap-1">
+                                        <i class="fa-regular fa-calendar"></i> 0 a 6 meses
+                                    </span>
+                                </div>
+                                <h4 class="text-base font-bold text-neutral-100 flex items-center gap-2">
+                                    <i class="fa-solid fa-cubes text-[#05b9f9]"></i> Fundação e Qualidade de Dados
+                                </h4>
+                                <p id="roadmapOnda1" class="text-xs text-neutral-300 leading-relaxed">
+                                    <!-- Injetado dinamicamente -->
+                                </p>
+                            </div>
+                            <div class="pt-4 border-t border-[#104283]/30">
+                                <span class="text-[10px] text-neutral-400 uppercase tracking-wider block font-bold">Meta do Período</span>
+                                <span class="text-xs text-[#05b9f9] font-medium flex items-center gap-1.5 mt-1">
+                                    <i class="fa-solid fa-check text-xs"></i> Dados mestres saneados e confiáveis
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Onda 2 -->
+                        <div class="card-glass rounded-xl p-5 border border-purple-500/20 flex flex-col justify-between space-y-4 hover:border-purple-500/50 transition duration-300">
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="bg-purple-500/10 text-purple-400 px-3 py-1 rounded-full text-xs font-bold border border-purple-500/25">
+                                        Onda 2
+                                    </span>
+                                    <span class="text-xs text-neutral-400 font-semibold flex items-center gap-1">
+                                        <i class="fa-regular fa-calendar"></i> 6 a 18 meses
+                                    </span>
+                                </div>
+                                <h4 class="text-base font-bold text-neutral-100 flex items-center gap-2">
+                                    <i class="fa-solid fa-network-wired text-purple-400"></i> Integração e Orquestração
+                                </h4>
+                                <p id="roadmapOnda2" class="text-xs text-neutral-300 leading-relaxed">
+                                    <!-- Injetado dinamicamente -->
+                                </p>
+                            </div>
+                            <div class="pt-4 border-t border-[#104283]/30">
+                                <span class="text-[10px] text-neutral-400 uppercase tracking-wider block font-bold">Meta do Período</span>
+                                <span class="text-xs text-purple-400 font-medium flex items-center gap-1.5 mt-1">
+                                    <i class="fa-solid fa-check text-xs"></i> Sinergia intersetorial e rotinas ágeis
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Onda 3 -->
+                        <div class="card-glass rounded-xl p-5 border border-rose-500/20 flex flex-col justify-between space-y-4 hover:border-rose-500/50 transition duration-300">
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="bg-rose-500/10 text-rose-400 px-3 py-1 rounded-full text-xs font-bold border border-rose-500/25">
+                                        Onda 3
+                                    </span>
+                                    <span class="text-xs text-neutral-400 font-semibold flex items-center gap-1">
+                                        <i class="fa-regular fa-calendar"></i> 18 a 36 meses
+                                    </span>
+                                </div>
+                                <h4 class="text-base font-bold text-neutral-100 flex items-center gap-2">
+                                    <i class="fa-solid fa-brain text-rose-400"></i> Escala Analítica e Autonomia
+                                </h4>
+                                <p id="roadmapOnda3" class="text-xs text-neutral-300 leading-relaxed">
+                                    <!-- Injetado dinamicamente -->
+                                </p>
+                            </div>
+                            <div class="pt-4 border-t border-[#104283]/30">
+                                <span class="text-[10px] text-neutral-400 uppercase tracking-wider block font-bold">Meta do Período</span>
+                                <span class="text-xs text-rose-400 font-medium flex items-center gap-1.5 mt-1">
+                                    <i class="fa-solid fa-check text-xs"></i> Operação preditiva e baseada em valor
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <footer class="bg-[#02153d] border-t border-[#104283]/40 py-6 mt-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p class="text-xs text-neutral-400">&copy; 2026 XMA.IA. Todos os direitos reservados. Avaliação estruturada com base na norma ISO 55000.</p>
+            <div class="flex gap-4 text-xs text-neutral-400">
+                <span class="hover:text-white transition cursor-default">Fábrica Goiana &amp; Unidades Operacionais</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Banco de dados completo contendo o mapeamento exato dos relatórios de maturidade
+        const groupsData = [
+            {
+                id: 1,
+                title: "Gestão do Ciclo de Vida e SGA",
+                scores: { "M. Dias Branco": 2.5, "Moura": 2.2, "Stellantis": 2.8, "Vivix": 2.0, "Brose": 2.4 },
+                mapeado: { "M. Dias Branco": true, "Moura": true, "Stellantis": true, "Vivix": true, "Brose": true },
+                fortalezas: {
+                    "M. Dias Branco": "Estratégia alinhada à visão corporativa e CAPEX para inovação.",
+                    "Moura": "Metodologias consistentes suportadas pelo WCM e integração de equipes.",
+                    "Stellantis": "Forte patrocínio global (Head de Digital Manufacturing).",
+                    "Vivix": "Rascunhos de políticas locais já mapeados.",
+                    "Brose": "Manutenção ativamente inserida nas requisições de CAPEX/OPEX e aderência IATF."
+                },
+                dores: {
+                    "M. Dias Branco": "Falta de aderência total às minúcias formais da ISO 55000.",
+                    "Moura": "Ciclo de vida tratado de forma reativa; ausência de auditorias ISO 55000.",
+                    "Stellantis": "Falta de política documentada local e decisões sem avaliação financeira (LCC).",
+                    "Vivix": "Modelagem de LCC feita manualmente no Excel e ausência de um Sistema (SGA) maduro.",
+                    "Brose": "Política informal, tomada de decisão curtoprazista baseada em problemas imediatos sem cálculo de LCC."
+                },
+                oportunidades: {
+                    "M. Dias Branco": "Consolidar o cálculo de Custo do Ciclo de Vida (LCC) para aprovações financeiras.",
+                    "Moura": "Inserir a análise LCC nas decisões primárias de substituição.",
+                    "Stellantis": "Cascatear diretrizes e formalizar a modelagem LCC em projetos.",
+                    "Vivix": "Implementar painel de SGA único e estender LCC para ativos críticos.",
+                    "Brose": "Estruturar painéis táticos e forçar benchmarks cruzados entre plantas."
+                }
+            },
+            {
+                id: 2,
+                title: "Gestão Financeira, Objetivos e Metas",
+                scores: { "M. Dias Branco": 3.2, "Moura": 3.0, "Stellantis": 2.9, "Vivix": 2.4, "Brose": 2.6 },
+                mapeado: { "M. Dias Branco": true, "Moura": true, "Stellantis": true, "Vivix": true, "Brose": true },
+                fortalezas: {
+                    "M. Dias Branco": "Orçamento rigoroso no SAP e metas da manutenção atreladas à PLR (OEO).",
+                    "Moura": "Visibilidade excelente das finanças de manutenção no SAP até o nível granular.",
+                    "Stellantis": "Arquitetura SAP apta a registrar e dividir gastos de forma robusta.",
+                    "Vivix": "Painéis (PBI) de Realizado x Orçado consumidos pela gestão.",
+                    "Brose": "Alta disciplina na medição orçamentária para a base operacional diária."
+                },
+                dores: {
+                    "M. Dias Branco": "O excesso de zelo gera rejeições e lentidão no fluxo do planejamento financeiro.",
+                    "Moura": "As análises não impactam na escolha da vida útil ou do momento de troca do maquinário.",
+                    "Stellantis": "Equipe técnica isolada do acesso aos custos gerados nas O.S.; PCM não planeja focado em risco financeiro.",
+                    "Vivix": "Orçamento pouco detalhado sem rastrear o valor financeiro do OPEX contra o valor original do ativo.",
+                    "Brose": "Falta de maturidade para converter os orçamentos de rotina em análise financeira prospectiva de longo prazo."
+                },
+                oportunidades: {
+                    "M. Dias Branco": "Usar análises com Inteligência Artificial para automatizar triagens financeiras.",
+                    "Moura": "Automatizar alertas financeiros (viabilidade econômica) interligados ao uso dos ativos.",
+                    "Stellantis": "Lançar painéis Power BI que entreguem metas de custo aos coordenadores de área.",
+                    "Vivix": "Criar Dicionários de KPIs de custo e painéis atrelados a cada linha fabril.",
+                    "Brose": "Empregar dados contábeis (depreciação) contra gastos locais."
+                }
+            },
+            {
+                id: 3,
+                title: "Engenharia de Confiabilidade e Riscos",
+                scores: { "M. Dias Branco": 3.5, "Moura": 2.8, "Stellantis": 2.5, "Vivix": 2.2, "Brose": 2.3 },
+                mapeado: { "M. Dias Branco": true, "Moura": true, "Stellantis": true, "Vivix": true, "Brose": true },
+                fortalezas: {
+                    "M. Dias Branco": "Aplicação de ponta (Tractian) massiva em equipamentos preditivos.",
+                    "Moura": "Criticidade estruturada sistemicamente (Matriz S-A-B-C) e painéis claros.",
+                    "Stellantis": "Criação de 'pilotos' preditivos em centros de custo estratégicos.",
+                    "Vivix": "Criticidade reavaliada e inspetores em campo.",
+                    "Brose": "Equipe engajada na identificação primária de falhas."
+                },
+                dores: {
+                    "M. Dias Branco": "RCA muito limitada à liderança e dificuldade para calcular o retorno financeiro da preditiva.",
+                    "Moura": "Apontamentos incompletos prejudicam que os algoritmos compreendam a verdadeira falha.",
+                    "Stellantis": "Sem expansão de FMEA/RCM para todas as famílias, sendo as manutenções reativas em maior volume.",
+                    "Vivix": "Causas e modos de falha não mapeados em O.S.; histórico frágil de integridade de tubulações.",
+                    "Brose": "Decisão tradicional, reagindo ao evento passado sem avaliar o impacto futuro do risco no negócio."
+                },
+                oportunidades: {
+                    "M. Dias Branco": "Expandir as técnicas de RCM combinadas a modelos preditivos de Machine Learning.",
+                    "Moura": "Utilizar os gatilhos das CBM para aprimorar RCAs automatizadas.",
+                    "Stellantis": "Padronizar FMEA/RCM corporativo dentro dos planos base.",
+                    "Vivix": "Integrar RCA por gatilho de quebra, FMEA massivo e automação de teste não destrutivo.",
+                    "Brose": "Adotar LCC sistemático como norteador de falhas funcionais e mitigação de vulnerabilidades."
+                }
+            },
+            {
+                id: 4,
+                title: "Gestão de Mudanças e Melhoria Contínua",
+                scores: { "M. Dias Branco": 3.0, "Moura": 2.7, "Stellantis": 2.6, "Vivix": 2.1, "Brose": 2.5 },
+                mapeado: { "M. Dias Branco": true, "Moura": true, "Stellantis": true, "Vivix": true, "Brose": true },
+                fortalezas: {
+                    "M. Dias Branco": "RCAs padronizados e benchmarking consolidado.",
+                    "Moura": "Cultura de reuniões embasadas por BI impulsiona análises.",
+                    "Stellantis": "Cultura flexível testando de chatbot a Machine Learning.",
+                    "Vivix": "Procedimentos para mudanças já documentados com avaliadores.",
+                    "Brose": "Alto rigor diário apoiando os KPIs do chão de fábrica."
+                },
+                dores: {
+                    "M. Dias Branco": "O grande número de Dashboards cria confusão e dispersão para justificar melhorias.",
+                    "Moura": "Gestão de Mudanças (MOC) rasa, sem formalidade de segurança e custos em alterações.",
+                    "Stellantis": "Dificuldade em 'espalhar' e padronizar inovações por toda a fábrica.",
+                    "Vivix": "Benefícios colhidos pós-mudança raramente são registrados; RCAs não viram rotina.",
+                    "Brose": "Faltam registros para compartilhar essas melhorias internamente (Lições Aprendidas em planilhas/boca-a-boca)."
+                },
+                oportunidades: {
+                    "M. Dias Branco": "Criação de um Hub Multicanal; capacitar técnicos para que eles puxem RCAs.",
+                    "Moura": "Formalizar processo corporativo unindo engenharia nas aprovações (MOC).",
+                    "Stellantis": "Formar comitês para transformar pilotos de melhoria em projetos escaláveis.",
+                    "Vivix": "Estabelecer painéis com cadência de resultados e 'gates' nas mudanças críticas.",
+                    "Brose": "Copiar o fluxo 'IT Demand' de aprovação sistêmica para criar um MOC robusto em campo."
+                }
+            },
+            {
+                id: 5,
+                title: "Gestão de MRO",
+                scores: { "M. Dias Branco": 3.1, "Moura": 0.0, "Stellantis": 0.0, "Vivix": 2.3, "Brose": 2.7 },
+                mapeado: { "M. Dias Branco": true, "Moura": false, "Stellantis": false, "Vivix": true, "Brose": true },
+                fortalezas: {
+                    "M. Dias Branco": "Acoplamento maduro de SAP MM e requisições preditivas.",
+                    "Moura": "Não Avaliado.",
+                    "Stellantis": "Não Avaliado.",
+                    "Vivix": "PBI cobrindo Lista de Materiais e inventário logístico base.",
+                    "Brose": "Inteligência para não atrasar O.S. críticas por falta de sobressalentes."
+                },
+                dores: {
+                    "M. Dias Branco": "Conflitos entre urgências vs. tempos lentos de compra de suprimentos.",
+                    "Moura": "Não Avaliado.",
+                    "Stellantis": "Não Avaliado.",
+                    "Vivix": "Limites de estoque (Máx/Mín) estáticos e falhas ignoradas em período de garantia.",
+                    "Brose": "Fluxo das informações de anomalias/defeitos nas peças tramita burocraticamente por processos humanos e papel."
+                },
+                oportunidades: {
+                    "M. Dias Branco": "Adoção do Copiloto de IA para predizer e sugerir requisições automaticamente.",
+                    "Moura": "Não Avaliado.",
+                    "Stellantis": "Não Avaliado.",
+                    "Vivix": "Criar modelos de IA p/ previsão de consumo (SKUs), 'Loja in company'.",
+                    "Brose": "Integrar os cadastros de defeitos de MRO às plataformas SAP automatizando RCAs logísticos."
+                }
+            },
+            {
+                id: 6,
+                title: "Suprimentos",
+                scores: { "M. Dias Branco": 2.9, "Moura": 2.5, "Stellantis": 0.0, "Vivix": 2.0, "Brose": 2.4 },
+                mapeado: { "M. Dias Branco": true, "Moura": true, "Stellantis": false, "Vivix": true, "Brose": true },
+                fortalezas: {
+                    "M. Dias Branco": "Acesso ao Coupa para transações mundiais de serviço/compra.",
+                    "Moura": "Forte vigilância de OPPEX (custo) na execução de compras pelo SAP.",
+                    "Stellantis": "Não Avaliado.",
+                    "Vivix": "Tempos de entrega e avaliação primária disponíveis em dashboards.",
+                    "Brose": "Avaliações diárias gerando alertas automáticos sobre desvios financeiros em suprimentos."
+                },
+                dores: {
+                    "M. Dias Branco": "Ausência de indicadores SLA integrados formalmente à prioridade da Manutenção.",
+                    "Moura": "Silos departamentais forçam os times a operarem ilhados sem cruzar o calendário produtivo.",
+                    "Stellantis": "Não Avaliado.",
+                    "Vivix": "A dependência do fornecedor importado trava os lead times; planejamento manual não acompanha sazonalidade.",
+                    "Brose": "Dependentes de extrações offline (planilhas de Excel) que paralisam a automação avaliativa do fornecedor."
+                },
+                oportunidades: {
+                    "M. Dias Branco": "Integrar medições rigorosas de entregas logísticas a painéis.",
+                    "Moura": "Integrar MRO e Planejamento p/ aquisições ágeis.",
+                    "Stellantis": "Não Avaliado.",
+                    "Vivix": "Nacionalização de componentes e previsão de Skus via ferramentas preditivas (Forecast).",
+                    "Brose": "Migrar para um Scorecard Dinâmico sistêmico ranqueando os prestadores em tempo real."
+                }
+            },
+            {
+                id: 7,
+                title: "SSMA, Cultura e Gestão do Conhecimento",
+                scores: { "M. Dias Branco": 3.4, "Moura": 3.3, "Stellantis": 3.1, "Vivix": 2.9, "Brose": 3.0 },
+                mapeado: { "M. Dias Branco": true, "Moura": true, "Stellantis": true, "Vivix": true, "Brose": true },
+                fortalezas: {
+                    "M. Dias Branco": "Alta liderança engajada; OEO atrelado à PLR; rituais focados em IA (Projeto MAIA).",
+                    "Moura": "Excelência extrema na cultura de Segurança e conformidade técnica.",
+                    "Stellantis": "Líder global incentivando tecnologia e parceiros em polos de tecnologia acadêmicos.",
+                    "Vivix": "SSMA maduro (ISO 14001) e matriz de competências bem traçada.",
+                    "Brose": "Disciplina de SSMA é rotineira na análise dos dados da liderança (Power BI)."
+                },
+                dores: {
+                    "M. Dias Branco": "Fuga de capital intelectual grave pelas falhas de padronização do histórico de informações.",
+                    "Moura": "Sem repositório formal do conhecimento (KMS); equipe técnica colocada à margem da esteira de inovação.",
+                    "Stellantis": "SSMA ainda não figura integrado à criticidade do ativo; conhecimento flutua nas cabeças de especialistas pontuais.",
+                    "Vivix": "Difícil provar a eficácia de cada treinamento e lições dispersas no repositório geral.",
+                    "Brose": "Acervo de aprendizados falho (investigações de quebra não centralizadas para equipes lerem)."
+                },
+                oportunidades: {
+                    "M. Dias Branco": "Aplicar a nova IA generativa internamente para resgatar/redigir manuais velozmente.",
+                    "Moura": "Puxar Capex focado em inovação da Gestão de Ativos e construir Portal colaborativo.",
+                    "Stellantis": "Embutir a pontuação SSMA na O.S. e formalizar retention técnica crítica.",
+                    "Vivix": "Assistentes de IA para resumir 'Lições Aprendidas' e Permissão de Trabalho (SSMA) Digital via tablet.",
+                    "Brose": "Elevar a colaboração criando bases de dados unificadas (KMS) com histórico vivo e consultável p/ toda frente de trabalho."
+                }
+            },
+            {
+                id: 8,
+                title: "Gestão de Terceiros",
+                scores: { "M. Dias Branco": 3.1, "Moura": 2.8, "Stellantis": 0.0, "Vivix": 2.3, "Brose": 2.6 },
+                mapeado: { "M. Dias Branco": true, "Moura": true, "Stellantis": false, "Vivix": true, "Brose": true },
+                fortalezas: {
+                    "M. Dias Branco": "Governança pelo Coupa amparada pelas oscilações de HH na produção.",
+                    "Moura": "O acompanhamento no campo mitiga desvios pontuais com terceiros e garante alinhamento às diretrizes locais.",
+                    "Stellantis": "Não Avaliado.",
+                    "Vivix": "Relação próxima e histórica com parceiros primordiais mapeada sistemicamente.",
+                    "Brose": "Demarcação limpa do escopo que é obrigação de execução própria vs execução terceirizada, garantindo alinhamento macro."
+                },
+                dores: {
+                    "M. Dias Branco": "Contratação ativada apenas por gargalo imediato, faltando acordos contínuos focados em performance do ativo.",
+                    "Moura": "Ferramentas avaliativas rudimentares e burocráticas; terceiros não entram na malha 'preditiva'.",
+                    "Stellantis": "Não Avaliado.",
+                    "Vivix": "Variabilidade sazonal desestabiliza a entrega dos terceirizados frente à falta de KPIs claros.",
+                    "Brose": "Desempenho monitorado de forma precária e subjetiva, sem cobrar qualidade com matrizes fixas; além de restrição ao capital de manuais."
+                },
+                oportunidades: {
+                    "M. Dias Branco": "Estabelecer retenções financeiras conectadas diretamente a entregas de SLA das contratadas.",
+                    "Moura": "Implementar métricas eletrônicas dinâmicas rastreando performance da terceirização.",
+                    "Stellantis": "Não Avaliado.",
+                    "Vivix": "Padronizar contratos orientados a SLAs de serviço e 'TCO' com fornecedor local.",
+                    "Brose": "Integrar os parceiros ao KMS interno e construir SLAs/KPIs contínuos fáceis de visualizar."
+                }
+            },
+            {
+                id: 9,
+                title: "IT&OT, Sistemas, Automação e IA",
+                scores: { "M. Dias Branco": 3.6, "Moura": 2.9, "Stellantis": 3.2, "Vivix": 2.2, "Brose": 2.8 },
+                mapeado: { "M. Dias Branco": true, "Moura": true, "Stellantis": true, "Vivix": true, "Brose": true },
+                fortalezas: {
+                    "M. Dias Branco": "Destaque máximo em interligação (PLCs, PiSystem, SAP APM, Snowflake e AWS Lake).",
+                    "Moura": "OT com cibersegurança sólida e rede integrando SAP-Gateways-MES.",
+                    "Stellantis": "Adoção plena de IA Generativa via EWO Chatbots, PLCs e padrão UNS.",
+                    "Vivix": "OT protegido e infraestrutura apta com fontes interligadas (produção, manutenção).",
+                    "Brose": "O esqueleto de rede industrial OT/IT e integração MES + SAP com cybersec rígida já operam em padrão elevado."
+                },
+                dores: {
+                    "M. Dias Branco": "Múltiplas ferramentas confundem as análises operacionais dos gerentes de linha.",
+                    "Moura": "Carga informacional altíssima depende de digitação e transferência manual p/ cruzar O.S.",
+                    "Stellantis": "Dados massivos não predizem sozinhas pois não contam com base 'MLOps' amadurecida, nem cibersegurança contínua (OT sec).",
+                    "Vivix": "Operação 100% desconectada da automação analítica; não há algoritmos interpretando os dados sem esforço humano bruto.",
+                    "Brose": "Nenhuma técnica avançada de DataOps cruza o potencial de inteligência dos dados descritivos na rede."
+                },
+                oportunidades: {
+                    "M. Dias Branco": "Organizar o hub central e estruturar esteira MLOps para IA.",
+                    "Moura": "Orquestrar 'Zero-ETL' (conexão direta sensores -> ERP) p/ ordens automatizadas.",
+                    "Stellantis": "Desenvolver a estrutura DataOps/MLOps para processamento seguro e automático da Visão Computacional.",
+                    "Vivix": "Lançar Agentes IA e validações mandatórias que preencham ordens sozinhas.",
+                    "Brose": "Aplicar algoritmos de IA/Machine Learning cruzando sinais de vibração x dados operacionais p/ automação prescritiva de falhas."
+                }
+            },
+            {
+                id: 10,
+                title: "Estratégias de Manutenção e PCM",
+                scores: { "M. Dias Branco": 3.1, "Moura": 2.6, "Stellantis": 2.8, "Vivix": 2.1, "Brose": 2.9 },
+                mapeado: { "M. Dias Branco": true, "Moura": true, "Stellantis": true, "Vivix": true, "Brose": true },
+                fortalezas: {
+                    "M. Dias Branco": "Planejamento em ciclo dinâmico 52 semanas e vistorias GEMBA integradas a APRs de campo.",
+                    "Moura": "Fluxo de comunicação ágil entre time de planejamento e SAP Fiori.",
+                    "Stellantis": "Eventos capturados ativamente e experimentação no planejamento.",
+                    "Vivix": "PCM organizado em fluxo S+1 com atividades claras de rotina.",
+                    "Brose": "Excelência disciplinar com >95% de aderência na meta do cronograma diário."
+                },
+                dores: {
+                    "M. Dias Branco": "Exigência braçal excessiva sobre o PCM com baixa qualidade gerada nas OS de rotina enviadas via Mobile.",
+                    "Moura": "Oportunidades emergenciais (quebras) estrangulam o tempo necessário para criar um calendário preventivo longo.",
+                    "Stellantis": "As SMPs caducam de qualidade e os técnicos fogem à ISO para informar falhas do campo.",
+                    "Vivix": "Cálculos complexos de agendamento ocorrem paralelamente (fora do SAP) e sem taxonomia 14224.",
+                    "Brose": "Visão fragmentada sem consenso tático oficial (Silos departamentais e distanciamento entre a Produção e o PCM)."
+                },
+                oportunidades: {
+                    "M. Dias Branco": "Otimizar balanceamento HH automatizado com IA MAIA.",
+                    "Moura": "Ferramentas analíticas e massificação de tarefas (SMPs) padronizadas em sistema para reverter falhas de documentação.",
+                    "Stellantis": "Mutirão de restruturação de planos focando no risco da matriz central; painel de PCM conectado.",
+                    "Vivix": "Validação automática da O.S. dentro do SAP para manter qualidade padronizada e Painéis PPCM preditivos.",
+                    "Brose": "Solução analítica otimizando cronogramas unindo tempo de HH disponível x Produção."
+                }
+            },
+            {
+                id: 11,
+                title: "Monitoramento de Condição (CBM), Preditiva e Execução",
+                scores: { "M. Dias Branco": 3.5, "Moura": 2.7, "Stellantis": 2.9, "Vivix": 2.3, "Brose": 2.8 },
+                mapeado: { "M. Dias Branco": true, "Moura": true, "Stellantis": true, "Vivix": true, "Brose": true },
+                fortalezas: {
+                    "M. Dias Branco": "Larga escala CBM interconectada ao SAP APM que abre notas automáticas no sistema.",
+                    "Moura": "Alguns acertos expressivos empregando CBM para ativos que eram gargalos graves.",
+                    "Stellantis": "Iniciativas arrojadas avaliando desgaste online das pinças de solda na área geradora.",
+                    "Vivix": "Aderência ótima entre os planos executados do que foi almejado; documentação legível e CBM Tractian presente.",
+                    "Brose": "Altíssima execução controlada dentro do padrão desenhado com interface do SAP Fiori."
+                },
+                dores: {
+                    "M. Dias Branco": "Técnicos de planta carecem de acesso simplificado à engenharia de dados, tornando difícil provar ROI de inovações à diretoria operante.",
+                    "Moura": "Grande porção da fábrica fica 'no escuro', resultando num delay retroativo p/ lançar a quebra manual na frente da máquina.",
+                    "Stellantis": "Prescrição preditiva fraca devido ao volume reativo, que drena os recursos que fariam a inspeção da CBM em larga escala.",
+                    "Vivix": "Falha humana severa no diagnóstico técnico da ordem; sensores agem como vigilantes isolados em vez de parte de uma predição em rede.",
+                    "Brose": "Não há diálogo via software: analista de vibração de fora avisa de falha em pdf e alguém redigita; O mantenedor perde tempo saindo da linha para buscar papéis/manuais pois não têm mobilidade."
+                },
+                oportunidades: {
+                    "M. Dias Branco": "Implementar dispositivos móveis que mostrem documentações e dar papel de analistas aos operadores.",
+                    "Moura": "Extensão da predição e integração 'Zero-ETL', para pular o lançamento humano falho.",
+                    "Stellantis": "Repriorizar CBM contra check-lists irrelevantes alocando painéis integrados e otimizados na agenda de Preditiva.",
+                    "Vivix": "Checagem Digital obrigatória no encerramento (Fotoregistro) e modelos CBM expandidos na infraestrutura (Automação de ultrassons em dutos).",
+                    "Brose": "Equipar equipes com tablets industriais seguros p/ manuais e AR (realidade aumentada) e API com plataformas CBM."
+                }
+            },
+            {
+                id: 12,
+                title: "Gestão de Paradas",
+                scores: { "M. Dias Branco": 3.0, "Moura": 0.0, "Stellantis": 0.0, "Vivix": 2.2, "Brose": 0.0 },
+                mapeado: { "M. Dias Branco": true, "Moura": false, "Stellantis": false, "Vivix": true, "Brose": false },
+                fortalezas: {
+                    "M. Dias Branco": "Gemba walks e sinergia de equipes atuando eficientemente nas transições de máquinas rápidas.",
+                    "Moura": "Não Avaliado.",
+                    "Stellantis": "Não Avaliado.",
+                    "Vivix": "Registro contínuo de macro eventos para transições de parada, garantido por pessoas-chave experientes.",
+                    "Brose": "Não Avaliado."
+                },
+                dores: {
+                    "M. Dias Branco": "Visibilidade pequena (dificuldade logística para prever itens de paradas gigantes antecipadamente).",
+                    "Moura": "Não Avaliado.",
+                    "Stellantis": "Não Avaliado.",
+                    "Vivix": "Os detalhes da pré-parada são superficiais e o almoxarifado não antecipa 100% os itens necessários no prazo.",
+                    "Brose": "Não Avaliado."
+                },
+                oportunidades: {
+                    "M. Dias Branco": "Acoplar a rede de CBM ao calendário OPEX, expandindo as janelas preditivas operacionais.",
+                    "Moura": "Não Avaliado.",
+                    "Stellantis": "Não Avaliado.",
+                    "Vivix": "Implementar painéis exclusivos da parada cruzando cronograma MRO x PCM.",
+                    "Brose": "Não Avaliado."
+                }
+            }
+        ];
+
+        // Paleta de cores Cyber-Neon personalizada para distinguir claramente cada empresa
+        const companyMeta = {
+            "M. Dias Branco": { color: "#00f0ff", colorAlpha: "rgba(0, 240, 255, 0.15)" },  // Saturated Electric Cyan
+            "Moura": { color: "#bd5cfa", colorAlpha: "rgba(189, 92, 250, 0.15)" },         // Deep Vibrant Royal Purple
+            "Stellantis": { color: "#ff2a85", colorAlpha: "rgba(255, 42, 133, 0.15)" },     // Electric Rose/Pink
+            "Vivix": { color: "#00e676", colorAlpha: "rgba(0, 230, 118, 0.15)" },          // Neon Mint/Green
+            "Brose": { color: "#ff9100", colorAlpha: "rgba(255, 145, 0, 0.15)" }           // Saturated Coral Orange/Amber
+        };
+
+        // Banco de dados dinâmico de Roadmaps estruturados por empresa
+        const companyRoadmaps = {
+            "M. Dias Branco": {
+                norte: "O focus é ganhar escala analítica. A empresa já possui a tecnologia e agora precisa focar em simplificar a interface humana, operacionalizar o Machine Learning (MLOps) e usar copilotos de IA (Projeto MAIA) para automatizar o planejamento e empoderar o técnico de campo nas análises de causa raiz.",
+                onda1: "Qualidade nos apontamentos móveis (padrão ISO 14224) e estruturação do Hub Único de Insights.",
+                onda2: "Automação do PCM e Almoxarifado via \"Copilotos\" (Projeto MAIA) e protagonismo dos técnicos nas Análises de Falha (RCA).",
+                onda3: "Decisões de CAPEX baseadas estritamente em Custo de Ciclo de Vida (LCC) e auditorias de gestão ISO 55000."
+            },
+            "Moura": {
+                norte: "O foco é a Transformação Digital Integrada e Engenharia Prescritiva. O desafio é eliminar o trabalho manual de planilhas integrando o chão de fábrica aos sistemas (Zero-ETL) para transformar painéis visuais estáticos em gatilhos preditivos online e formalizar a Gestão do Conhecimento.",
+                onda1: "Implementação do Repositório de Conhecimento e padronização do fluxo de Gestão de Mudanças (MOC).",
+                onda2: "Integração dos sensores com o SAP e sistemas MES, além de insights acionáveis preditivos substituindo a análise humana em painéis.",
+                onda3: "Expansão da CBM para ativos de curva A e B, com algoritmos de Machine Learning atrelados ao custo de ciclo de vida."
+            },
+            "Stellantis": {
+                norte: "O foco é sair da experimentação isolada para a padronização escalável. A estratégia deve focar na implementação urgente de cibersegurança industrial (OT Security), documentação de uma Política de Gestão de Ativos formal e uso do padrão UNS para operacionalizar os pilotos de IA para toda a fábrica.",
+                onda1: "Cibersegurança industrial (OT Security) e formalização da Política de Gestão de Ativos.",
+                onda2: "Operacionalização analítica (MLOps) da visão computacional e criação do fórum corporativo de retenção de conhecimento.",
+                onda3: "Expansão do padrão Unified Namespace (UNS) para toda a planta e adoção de um Copiloto IA para anomalias financeiras."
+            },
+            "Vivix": {
+                norte: "O foco atual é \"fazer o básico muito bem feito\". A estratégia concentra-se em estruturar os fundamentos de dados (taxonomia ISO 14224), integrar processos entre manutenção e suprimentos (MRO dinâmico) e unificar o planejamento para depois escalar o uso de IA.",
+                onda1: "Saneamento de dados (ISO 14224), política dinâmica de estoque (MRO) e checklists digitais de execução.",
+                onda2: "Implementação massiva de RCA por recorrência e consolidação da governança entre Suprimentos e Manutenção.",
+                onda3: "Uso maduro de LCC, APM (Asset Performance Management) completo, orquestração multicanal e previsões orientadas por IA."
+            },
+            "Brose": {
+                norte: "O foco é conectar a infraestrutura de TI/OT robusta já existente à inteligência avançada. A estratégia mira a integração sistêmica contínua (Zero-ETL entre sensores e SAP), a adoção da mobilidade para técnicos de campo via tablets e o uso do Custo de Ciclo de Vida (LCC) para balizar decisões de OPEX/CAPEX.",
+                onda1: "Integração sistêmica via \"Zero-ETL\" (CBM direto para o SAP PM) e eliminação de silos e planilhas paralelas.",
+                onda2: "Mobilidade digital com tablets intrinsecamente seguros e instituição de rituais de S&OP entre manutenção e produção.",
+                onda3: "Adoção de Machine Learning e algoritmos preditivos avançados sobre o MES/vibração para predizer quebras."
+            }
+        };
+
+        let activeCompanies = ["M. Dias Branco", "Moura", "Stellantis", "Vivix", "Brose"];
+        let globalRadarChart = null;
+        let pillarBarChart = null;
+
+        // Inicialização do painel no carregamento da janela
+        window.onload = function() {
+            buildCompanyCheckboxes();
+            buildPillarSelector();
+            buildRoadmapSelector();
+            
+            // Renderizações iniciais
+            renderGlobalRadar();
+            loadPillarData();
+        };
+
+        function buildCompanyCheckboxes() {
+            const container = document.getElementById("companiesCheckboxes");
+            if (!container) return;
+            container.innerHTML = "";
+            Object.keys(companyMeta).forEach(name => {
+                const isActive = activeCompanies.includes(name);
+                const color = companyMeta[name].color;
+                container.innerHTML += `
+                    <label class="flex items-center gap-3 p-3 rounded-lg border transition cursor-pointer ${isActive ? 'bg-[#104283]/30 border-[#05b9f9]/40' : 'bg-[#02153d]/50 border-[#104283]/30 opacity-60 hover:opacity-95'}">
+                        <input type="checkbox" ${isActive ? 'checked' : ''} onchange="toggleCompany('${name}')" class="sr-only">
+                        <div class="w-4 h-4 rounded flex items-center justify-center border transition" style="border-color: ${color}; background-color: ${isActive ? color : 'transparent'}">
+                            ${isActive ? '<i class="fa-solid fa-check text-[10px] text-white"></i>' : ''}
+                        </div>
+                        <span class="text-sm font-medium text-neutral-100">${name}</span>
+                    </label>
+                `;
+            });
+        }
+
+        function toggleCompany(name) {
+            if (activeCompanies.includes(name)) {
+                if (activeCompanies.length > 1) {
+                    activeCompanies = activeCompanies.filter(c => c !== name);
+                } else {
+                    buildCompanyCheckboxes(); // restaura se tentar desmarcar a única ativa
+                    return;
+                }
+            } else {
+                activeCompanies.push(name);
+            }
+            buildCompanyCheckboxes();
+            renderGlobalRadar();
+            loadPillarData();
+            buildRoadmapSelector();
+        }
+
+        function toggleAllCompanies(enable) {
+            if (enable) {
+                activeCompanies = Object.keys(companyMeta);
+            }
+            buildCompanyCheckboxes();
+            renderGlobalRadar();
+            loadPillarData();
+            buildRoadmapSelector();
+        }
+
+        function buildRoadmapSelector() {
+            const selector = document.getElementById("pilarSelector"); // standard selector fallback safeguard
+            const roadmapSelector = document.getElementById("roadmapCompanySelector");
+            
+            // Re-render company selector for roadmap dynamically based on active companies
+            let activeDrop = document.getElementById("roadmapCompanySelector");
+            if (!activeDrop) {
+                // If the dropdown element doesn't exist, we construct it on demand in the DOM
+                const selectContainer = document.querySelector("#tab-roadmap .card-glass");
+                if (selectContainer) {
+                    const dropdownHTML = `
+                        <div class="mt-4 flex flex-col md:flex-row md:items-center justify-between gap-4 pt-4 border-t border-[#104283]/30">
+                            <div>
+                                <span class="text-xs font-semibold text-neutral-400 block">Indústria em Foco para o Roadmap</span>
+                                <span class="text-xs text-[#05b9f9] font-bold">Consulte o plano tático específico filtrando abaixo:</span>
+                            </div>
+                            <div class="w-full md:w-64">
+                                <select id="roadmapCompanySelector" onchange="renderRoadmap()" class="w-full bg-[#02153d] border border-[#104283]/60 rounded-lg px-3 py-2 text-sm text-neutral-200 focus:outline-none focus:border-[#05b9f9] cursor-pointer">
+                                </select>
+                            </div>
+                        </div>
+                    `;
+                    selectContainer.insertAdjacentHTML('beforeend', dropdownHTML);
+                    activeDrop = document.getElementById("roadmapCompanySelector");
+                }
+            }
+
+            if (activeDrop) {
+                activeDrop.innerHTML = "";
+                activeCompanies.forEach(c => {
+                    activeDrop.innerHTML += `<option value="${c}">${c}</option>`;
+                });
+            }
+            renderRoadmap();
+        }
+
+        function renderDynamicRoadmap() {
+            renderRoadmap();
+        }
+
+        function renderRoadmap() {
+            const selectEl = document.getElementById("roadmapCompanySelector");
+            if (!selectEl) return;
+            const companyName = selectEl.value || activeCompanies[0];
+            const roadmapData = companyMeta[companyName];
+            if (!roadmapData) return;
+
+            // Highlight active company's custom values based on dynamic context
+            const staticWaves = {
+                "M. Dias Branco": {
+                    norte: "O foco é ganhar escala analítica. A empresa já possui a tecnologia e agora precisa focar em simplificar a interface humana, operacionalizar o Machine Learning (MLOps) e usar copilotos de IA (Projeto MAIA) para automatizar o planejamento e empoderar o técnico de campo nas análises de causa raiz.",
+                    onda1: "Qualidade nos apontamentos móveis (padrão ISO 14224) e estruturação do Hub Único de Insights.",
+                    onda2: "Automação do PCM e Almoxarifado via \"Copilotos\" (Projeto MAIA) e protagonismo dos técnicos nas Análises de Falha (RCA).",
+                    onda3: "Decisões de CAPEX baseadas estritamente em Custo de Ciclo de Vida (LCC) e auditorias de gestão ISO 55000."
+                },
+                "Moura": {
+                    norte: "O foco é a Transformação Digital Integrada e Engenharia Prescritiva. O desafio é eliminar o trabalho manual de planilhas integrando o chão de fábrica aos sistemas (Zero-ETL) para transformar painéis visuais estáticos em gatilhos preditivos online e formalizar a Gestão do Conhecimento.",
+                    onda1: "Implementação do Repositório de Conhecimento e padronização do fluxo de Gestão de Mudanças (MOC).",
+                    onda2: "Integração dos sensores com o SAP e sistemas MES, além de insights acionáveis preditivos substituindo a análise humana em painéis.",
+                    onda3: "Expansão da CBM para ativos de curva A e B, com algoritmos de Machine Learning atrelados ao custo de ciclo de vida."
+                },
+                "Stellantis": {
+                    norte: "O foco é sair da experimentação isolada para a padronização escalável. A estratégia deve focar na implementação urgente de cibersegurança industrial (OT Security), documentação de uma Política de Gestão de Ativos formal e uso do padrão UNS para operacionalizar os pilotos de IA para toda a fábrica.",
+                    onda1: "Cibersegurança industrial (OT Security) e formalização da Política de Gestão de Ativos.",
+                    onda2: "Operacionalização analítica (MLOps) da visão computacional e criação do fórum corporativo de retenção de conhecimento.",
+                    onda3: "Expansão do padrão Unified Namespace (UNS) para toda a planta e adoção de um Copiloto IA para anomalias financeiras."
+                },
+                "Vivix": {
+                    norte: "O foco atual é \"fazer o básico muito bem feito\". A estratégia concentra-se em estruturar os fundamentos de dados (taxonomia ISO 14224), integrar processos entre manutenção e suprimentos (MRO dinâmico) e unificar o planejamento para depois escalar o uso de IA.",
+                    onda1: "Saneamento de dados (ISO 14224), política dinâmica de estoque (MRO) e checklists digitais de execução.",
+                    onda2: "Implementação massiva de RCA por recorrência e consolidação da governança entre Suprimentos e Manutenção.",
+                    onda3: "Uso maduro de LCC, APM (Asset Performance Management) completo, orquestração multicanal e previsões orientadas por IA."
+                },
+                "Brose": {
+                    norte: "O foco é conectar a infraestrutura de TI/OT robusta já existente à inteligência avançada. A estratégia mira a integração sistêmica contínua (Zero-ETL entre sensores e SAP), a adoção da mobilidade para técnicos de campo via tablets e o uso do Custo de Ciclo de Vida (LCC) para balizar decisões de OPEX/CAPEX.",
+                    onda1: "Integração sistêmica via \"Zero-ETL\" (CBM direto para o SAP PM) e eliminação de silos e planilhas paralelas.",
+                    onda2: "Mobilidade digital com tablets intrinsecamente seguros e instituição de rituais de S&OP entre manutenção e produção.",
+                    onda3: "Adoção de Machine Learning e algoritmos preditivos avançados sobre o MES/vibração para predizer quebras."
+                }
+            };
+
+            const data = companyRoadmaps[companyName] || staticWaves[companyName];
+            if (data) {
+                document.getElementById("roadmapNorte").innerHTML = `<span style="color: ${roadmapData.color}; font-weight: bold;">[${companyName}]</span> ${data.norte}`;
+                document.getElementById("roadmapOnda1").innerText = data.onda1;
+                document.getElementById("roadmapOnda2").innerText = data.onda2;
+                document.getElementById("roadmapOnda3").innerText = data.onda3;
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
+            document.getElementById(tabId).classList.remove("hidden");
+
+            document.querySelectorAll("button[id^='tabBtn-']").forEach(btn => {
+                btn.classList.remove("active-tab");
+                btn.classList.add("text-neutral-400");
+            });
+            const activeBtn = document.getElementById("tabBtn-" + tabId.replace("tab-", ""));
+            if (activeBtn) {
+                activeBtn.classList.add("active-tab");
+                activeBtn.classList.remove("text-neutral-400");
+            }
+
+            if (tabId === 'tab-global' && globalRadarChart) {
+                globalRadarChart.resize();
+            } else if (tabId === 'tab-explorer' && pillarBarChart) {
+                pillarBarChart.resize();
+            }
+        }
+
+        function renderGlobalRadar() {
+            const ctx = document.getElementById("globalRadarChartCanvas");
+            if (!ctx) return;
+
+            // Prepara os conjuntos de dados de forma dinâmica
+            const datasets = [];
+            activeCompanies.forEach(name => {
+                const meta = companyMeta[name];
+                const scoresData = groupsData.map(g => {
+                    return g.scores[name] || 0;
+                });
+
+                datasets.push({
+                    label: name,
+                    data: scoresData,
+                    borderColor: meta.color,
+                    backgroundColor: meta.colorAlpha,
+                    borderWidth: 2.5,
+                    pointBackgroundColor: meta.color,
+                    pointHoverRadius: 6,
+                    pointRadius: 3
+                });
+            });
+
+            if (globalRadarChart) {
+                globalRadarChart.destroy();
+            }
+
+            globalRadarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: groupsData.map(g => `Pilar ${g.id}`),
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#e5e5e5',
+                                font: { size: 10, family: 'Arial' }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: (tooltipItems) => {
+                                    const index = tooltipItems[0].dataIndex;
+                                    return groupsData[index].title;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(16, 66, 131, 0.3)' },
+                            grid: { color: 'rgba(16, 66, 131, 0.3)' },
+                            pointLabels: {
+                                color: '#a3a3a3',
+                                font: { size: 10, weight: 'bold' }
+                            },
+                            ticks: {
+                                color: '#737373',
+                                backdropColor: 'transparent',
+                                stepSize: 1,
+                                font: { size: 9 }
+                            },
+                            min: 0,
+                            max: 4
+                        }
+                    }
+                }
+            });
+        }
+
+        function buildPillarSelector() {
+            const selector = document.getElementById("pilarSelector");
+            if (!selector) return;
+            selector.innerHTML = "";
+            groupsData.forEach(g => {
+                selector.innerHTML += `<option value="${g.id}">Pilar ${g.id}: ${g.title}</option>`;
+            });
+        }
+
+        function loadPillarData() {
+            const selector = document.getElementById("pilarSelector");
+            if (!selector) return;
+            
+            const pilarId = parseInt(selector.value) || 1;
+            const group = groupsData.find(g => g.id === pilarId);
+            if (!group) return;
+
+            // Renderização do gráfico de barras de suporte
+            const ctx = document.getElementById("pillarBarChart");
+            if (ctx) {
+                const labels = activeCompanies;
+                const dataValues = activeCompanies.map(name => group.scores[name] || 0);
+                const bgColors = activeCompanies.map(name => companyMeta[name].color);
+
+                if (pillarBarChart) {
+                    pillarBarChart.destroy();
+                }
+
+                pillarBarChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: dataValues,
+                            backgroundColor: bgColors,
+                            borderRadius: 6,
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                grid: { color: 'rgba(16, 66, 131, 0.15)' },
+                                ticks: { color: '#a3a3a3', font: { size: 10 } },
+                                min: 0,
+                                max: 4
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#a3a3a3', font: { size: 11, weight: 'bold' } }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Geração dos cartões detalhados por empresa (Fortalezas, Dores, Oportunidades)
+            const container = document.getElementById("pillarCardsContainer");
+            if (container) {
+                container.innerHTML = "";
+                
+                activeCompanies.forEach(name => {
+                    const color = companyMeta[name].color;
+                    const isMapeado = group.mapeado[name] !== false;
+                    const score = group.scores[name] || 0;
+
+                    let statusBadge = "";
+                    if (isMapeado) {
+                        let levelText = score >= 3.0 ? "Avançado" : score >= 2.0 ? "Básico" : "Deficiente";
+                        let badgeColor = score >= 3.0 ? "rgba(0, 230, 118, 0.15)" : score >= 2.0 ? "rgba(255, 145, 0, 0.15)" : "rgba(239, 68, 68, 0.15)";
+                        let textColor = score >= 3.0 ? "#00e676" : score >= 2.0 ? "#ff9100" : "#ef4444";
+                        let borderColor = score >= 3.0 ? "rgba(0, 230, 118, 0.3)" : score >= 2.0 ? "rgba(255, 145, 0, 0.3)" : "rgba(239, 68, 68, 0.3)";
+
+                        statusBadge = `
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs px-2.5 py-0.5 rounded border font-semibold" style="background-color: ${badgeColor}; color: ${textColor}; border-color: ${borderColor}">
+                                    ${levelText} (${score.toFixed(1)})
+                                </span>
+                            </div>
+                        `;
+                    } else {
+                        statusBadge = `
+                            <span class="text-xs px-2.5 py-0.5 rounded border bg-neutral-850 text-neutral-400 border-neutral-700 font-semibold italic">
+                                Não Avaliado (N/A)
+                            </span>
+                        `;
+                    }
+
+                    const fort = group.fortalezas[name] || "Não detalhado.";
+                    const dor = group.dores[name] || "Não detalhado.";
+                    const op = group.oportunidades[name] || "Não detalhado.";
+
+                    container.innerHTML += `
+                        <div class="card-glass rounded-xl p-5 border transition flex flex-col justify-between space-y-4 hover:border-[#05b9f9]/40" style="border-top: 4px solid ${color}">
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between gap-2">
+                                    <h4 class="text-sm font-bold text-neutral-100 flex items-center gap-2">
+                                        <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${color}"></span>
+                                        ${name}
+                                    </h4>
+                                    ${statusBadge}
+                                </div>
+
+                                <div class="space-y-3 pt-2">
+                                    <div class="space-y-1">
+                                        <span class="text-[10px] uppercase font-bold text-emerald-400 flex items-center gap-1 tracking-wider">
+                                            <i class="fa-solid fa-circle-check text-[9px]"></i> Fortaleza
+                                        </span>
+                                        <p class="text-xs text-neutral-300 leading-relaxed">${fort}</p>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <span class="text-[10px] uppercase font-bold text-rose-400 flex items-center gap-1 tracking-wider">
+                                            <i class="fa-solid fa-circle-exclamation text-[9px]"></i> Dor / Gargalo
+                                        </span>
+                                        <p class="text-xs text-neutral-300 leading-relaxed">${dor}</p>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <span class="text-[10px] uppercase font-bold text-[#05b9f9] flex items-center gap-1 tracking-wider">
+                                            <i class="fa-solid fa-lightbulb text-[9px]"></i> Oportunidade
+                                        </span>
+                                        <p class="text-xs text-neutral-300 leading-relaxed">${op}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        }
+    </script>
+</body>
+</html>
